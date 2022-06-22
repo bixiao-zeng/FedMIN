@@ -1,5 +1,5 @@
 # FedMIN: Federated Learning with Mixed Noise
-**Journal:** Under Review at ACM Transactions on Intelligent Systems and Technology
+**Journal:** Under Review at IEEE Transactions on Knowledge and Data Engineering
 
 **Authors:** BIXIAO ZENG, XIAODONG YANG, YIQIANG CHEN∗, HANCHAO YU, CHUNYU HU, YINGWEI ZHANG
 
