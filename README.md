@@ -9,6 +9,6 @@
 ---
 
 ```pseudocode
-python3 FedMIN.py --dataset [cifar10] --noisy_datset [SVHN] --mode [asym] --r [0.6] --on [0.5] --num_classes [10] --num_users [4] 
+python3 FedMIN.py --dataset [cifar10] --noisy_datset [SVHN] --mode [asym] --r [0.6] --on [0.5] --num_classes [10] --noisy_clnt [0.25] --num_users [20] 
 ```
 
