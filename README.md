@@ -1,2 +1,15 @@
 # FedMIN
 A Mixed Noise-Robust Federated Learning Method
+**Journal:** Under Review at ACM Transactions on Intelligent Systems and Technology
+
+**Authors:** BIXIAO ZENG, XIAODONG YANG, YIQIANG CHEN∗, HANCHAO YU, CHUNYU HU, YINGWEI ZHANG
+
+
+
+**Getting Started**
+---
+
+```pseudocode
+python3 FedMIN.py --dataset [cifar10] --noisy_datset [SVHN] --mode [asym] --r [0.6] --on [0.5] --num_classes [10] --num_users [4] 
+```
+
