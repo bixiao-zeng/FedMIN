@@ -1,5 +1,4 @@
-# FedMIN
-A Mixed Noise-Robust Federated Learning Method
+# FedMIN: Federated Learning with Mixed Noise
 **Journal:** Under Review at ACM Transactions on Intelligent Systems and Technology
 
 **Authors:** BIXIAO ZENG, XIAODONG YANG, YIQIANG CHEN∗, HANCHAO YU, CHUNYU HU, YINGWEI ZHANG
