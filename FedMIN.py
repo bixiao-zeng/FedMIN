@@ -229,8 +229,7 @@ class Server():
             lossC = LOSS
             lossB = 0
         logger.debug("\n| %s |Global Epoch #%d\t Accuracy: %.2f%%\n" % (mod_name, epoch, acc))
-        writer.add_scalars('Test/Accuracy', {'netB': accB, 'netC': accC}, epoch)
-        writer.add_scalars('Test/Loss', {'netB': lossB, 'netC': lossC}, epoch)
+
         del acc, LOSS
 
 
@@ -304,8 +303,6 @@ class Server():
                 inixis = dis
                 temp = t - 1
                 best_idx = idx
-            if log:
-                writer.add_scalar('KS_loss', dis, t)
             idx += 1
         kneedle_cov_dec = KneeLocator(STEP[:best_idx], distance[:best_idx], curve='convex',
                                       direction='decreasing',online=True)
@@ -777,7 +774,7 @@ class Client:
          
         return model.state_dict(), len(self.dataset)
 
-    def refine_labels_new(self,epoch,log=True):
+    def refine_labels_new(self):
         probClosed = self.probs[2]
         self.model_C.eval()
         samples = self.dataset.samples
@@ -877,23 +874,6 @@ class Client:
             f1score = (recall + precision) / 2
 
         return recall, precision, round(f1score, 2)
-
-    def performance(self, epoch):
-        preds = self.preds
-        
-        recall_clean, precision_clean, f1score_clean= self.detect_noise_index(preds[0], type='clean')
-        recall_open, precision_open, f1score_open= self.detect_noise_index(preds[1], type='open')
-        recall_close, precision_close, f1score_close = self.detect_noise_index(preds[2], type='closed')
-
-        writer.add_scalars('Attacker_Index/clean',
-                           {'recall': recall_clean, 'precision': precision_clean,
-                            'f1score': f1score_clean}, epoch)
-        writer.add_scalars('Attacker_Index/open',
-                           {'recall': recall_open, 'precision': precision_open,
-                            'f1score': f1score_open}, epoch)
-        writer.add_scalars('Attacker_Index/close',
-                           {'recall': recall_close, 'precision': precision_close,
-                            'f1score': f1score_close}, epoch)
 
     def pred_noise(self, probs):
 
@@ -1159,90 +1139,6 @@ class FedMIN:
             pickle.dump(noise_chart_cl, f)
 
 
-    def logDetectIndex(self, epoch):
-        right_clean,right_close,right_open = 0,0,0
-        num_clean,num_close,num_open = 0,0,0
-        pred_clean,pred_close,pred_open = 0,0,0
-        for ix in range(args.num_users):
-            preds = self.clients[ix].preds
-            clean,open,close = self.clients[ix].get_noise()
-            num_clean += np.sum(clean)
-            num_open += np.sum(open)
-            num_close += np.sum(close)
-            # open_ratio = num_open/len(clean)
-            # close_ratio = num_close/len(clean)
-            equal = preds[0]==clean
-            right_clean += np.sum(np.array(clean)[equal])
-            right_open += np.sum(np.array(open)[preds[1]==open])
-            right_close += np.sum(np.array(close)[preds[2]==close])
-            pred_clean += np.sum(preds[0])
-            pred_open += np.sum(preds[1])
-            pred_close += np.sum(preds[2])
-
-        right_noise = right_open+right_close
-        num_noise = num_open+num_close
-        recall_noise = round(right_noise/num_noise,4)
-        precision_noise = right_noise/(pred_open+pred_close)
-        f1score_noise = (recall_noise+precision_noise)/2
-
-        recall_clean = round(right_clean/num_clean,4)
-        precision_clean = right_clean/pred_clean
-        f1score_clean = (recall_clean+precision_clean)/2
-
-        recall_open = right_open/num_open
-        precision_open = right_open/pred_open
-        f1score_open = (recall_open+precision_open)/2
-
-        recall_close = round(right_close/num_close,4)
-        precisions_close = right_close/pred_close
-        f1score_close = (recall_close+precisions_close)/2
-
-        writer.add_scalars('Attacker_Index/clean',
-                           {'recall': recall_clean, 'precision': precision_clean,
-                            'f1score': f1score_clean}, epoch)
-        writer.add_scalars('Attacker_Index/open',
-                           {'recall': recall_open, 'precision': precision_open,
-                            'f1score': f1score_open}, epoch)
-        writer.add_scalars('Attacker_Index/close',
-                           {'recall': recall_close, 'precision': precisions_close,
-                            'f1score': f1score_close}, epoch)
-
-    def logCorrectIndex(self, epoch):
-        right = 0
-        revision = 0
-        num_close = 0
-        cRat,oRat,clRat = 0,0,0
-        for ix in range(args.num_users):
-            Y_raw = self.clients[ix].dataset.labels
-            Y_corr = self.clients[ix].sudo_labels
-            Y_real = self.clients[ix].clean_labels
-            clean,open,close = self.clients[ix].get_noise()
-            revision += np.sum(Y_raw!=Y_corr)
-            num_close += np.sum(close)
-            for i in range(len(Y_raw)):
-                if Y_corr[i]!= Y_raw[i]:
-                    if clean[i]:
-                        cRat += 1
-                    elif open[i]:
-                        oRat += 1
-                    elif close[i]:
-                        clRat += 1
-                    if Y_corr[i]==Y_real[i]:
-                        right += 1
-
-        recall = right/num_close
-        precision = right/revision
-        f1score = (recall+precision)/2
-
-        writer.add_scalars('Attacker_Index/refine',
-                           {'recall': recall, 'precision': precision,
-                            'f1score': f1score}, epoch)
-
-        writer.add_scalars('Attacker_Index/refine_compo',
-                           {'clean': cRat, 'open': oRat,
-                            'closed': clRat}, epoch)
-
-
     def runExperiment(self):
 
         weights_C = [[] for i in range(args.num_users)]
@@ -1267,8 +1163,7 @@ class FedMIN:
                         diff_1[ix], diff_2[ix] = d1,d2
                         tag1_lst[ix], tag2_lst[ix] = t1,t2
                         self.clients[ix].eval_train(tag1=tag1_lst[ix],tag2=tag2_lst[ix])
-                        if noise_idx[ix]:
-                            self.clients[ix].performance(epoch)
+
 
                 else:
                     for ix in range(args.num_users):
@@ -1303,12 +1198,11 @@ class FedMIN:
                     for iter in range(10):
                         print('\nTrain netD')
                         weights_C[ix], Keep_size_C[ix] = self.clients[ix].local_Mixmatch(epoch, iter)
-                    self.clients[ix].refine_labels_new(epoch=epoch, log=False)
+                    self.clients[ix].refine_labels_new(epoch=epoch)
                 else:
                     print('\nTrain netD')
                     weights_C[ix], Keep_size_C[ix] = self.clients[ix].local_update(epoch, 'netC')
-                if ix == args.num_users - 1:
-                    self.logCorrectIndex(epoch)
+
 
             print('Global model of epoch={} aggregating...'.format(epoch))
             for ix in range(args.num_users):
