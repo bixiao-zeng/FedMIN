@@ -1,4 +1,4 @@
-# FedMIN: Federated Learning with Mixed Noise
+# FedMIN: Federated Data Quality Assessment Approach: Robust Learning With Mixed Label Noise
 **Journal:** Accepted by IEEE Transactions on Neural Networks and Learning Systems
 https://ieeexplore.ieee.org/abstract/document/10236466
 
