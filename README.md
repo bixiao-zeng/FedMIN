@@ -1,5 +1,5 @@
 # FedMIN: Federated Learning with Mixed Noise
-**Journal:** Accepted by IEEE Transactions on Knowledge and Data Engineering 
+**Journal:** Accepted by IEEE Transactions on Neural Networks and Learning Systems
 https://ieeexplore.ieee.org/abstract/document/10236466
 
 **Authors:** BIXIAO ZENG, XIAODONG YANG, YIQIANG CHEN∗, HANCHAO YU, CHUNYU HU, YINGWEI ZHANG
